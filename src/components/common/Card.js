@@ -2,7 +2,6 @@ import React from 'react';
 import {View} from 'react-native';
 
 const Card = (props) => {
-    
     console.log('in card');
     return (
         <View style={styles.containerStyle}>

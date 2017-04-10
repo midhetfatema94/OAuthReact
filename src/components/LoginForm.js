@@ -1,25 +1,54 @@
 import React, { Component } from 'react';
-import { Button, Card, CardSection, Input } from './common';
+import { Button, Card, CardSection, Input, Spinner } from './common';
 import firebase from 'firebase';
 import { Text } from 'react-native';
 
 class LoginForm extends Component {
     
-    state = { email: '', password: '', error: '' };
+    state = { email: '', password: '', error: '', loading: false };
     
-    onButtonPress () {
+    clickedLogin () {
         const { email, password } = this.state;
 
-        this.setState({ error: " " })
+        this.setState({ error: '', loading: true })
+
+        // console.log('button has been pressed')
 
         firebase.auth().signInWithEmailAndPassword(email, password)
+        .then(this.onLoginSuccess.bind(this))
         .catch(() => {
             firebase.auth().createUserWithEmailAndPassword(email, password)
-            .catch(() => {
-                this.setState({ error: "Authentication Failed." })
-            });
+            .then(this.onLoginSuccess.bind(this))
+            .catch(this.onLoginFailure.bind(this));
         });
 
+    }
+
+    renderButton () {
+        
+        if (this.state.loading) {
+            return <Spinner spinnerSize='small' />
+        }
+        return (
+            <Button onPress={this.clickedLogin.bind(this)}>
+                Login
+            </Button>
+        )
+    }
+
+    onLoginFailure() {
+
+        this.setState({ error: "Authentication Failed.", loading: false })
+    }
+
+    onLoginSuccess () {
+        
+        this.setState({
+            error: '',
+            email: '',
+            password: '',
+            loading: false
+        });
     }
 
     render () {
@@ -49,9 +78,7 @@ class LoginForm extends Component {
                 </Text>
                 
                 <CardSection>
-                    <Button onButtonPress={this.onButtonPress}>
-                        Login
-                    </Button>
+                    {this.renderButton()}
                 </ CardSection>
             </ Card>
         );
